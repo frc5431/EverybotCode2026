@@ -26,6 +26,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.commands.ClimbDown;
 import frc.robot.commands.ClimbUp;
 import frc.robot.commands.Eject;
+import frc.robot.commands.ExampleAuto;
 import frc.robot.commands.Intake;
 import frc.robot.commands.Launch;
 import frc.robot.commands.LaunchSequence;
@@ -38,7 +39,7 @@ public class RobotContainer {
     private double SlowMaxAngularRate = 0.3*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     
     
-    private double MaxSpeed = 0.3 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxSpeed = 0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = 0.3*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -108,7 +109,7 @@ public class RobotContainer {
             );
 
 
-            }).withTimeout(0.1));
+            }, drivetrain).withTimeout(0.1));
 
 //Apply rotation right when right dpad is pressed         
 driveJoystick.povRight()
@@ -120,7 +121,7 @@ driveJoystick.povRight()
             );
 
 
-            }).withTimeout(0.1));
+            }, drivetrain).withTimeout(0.1));
 
 
 
@@ -153,7 +154,7 @@ driveJoystick.povRight()
             );
 
 
-            }));
+            }, drivetrain));
     
     // END OF NOT TESTED        
 
@@ -161,7 +162,7 @@ driveJoystick.povRight()
         
 
         operatorJoystick.axisLessThan(XboxController.Axis.kRightY.value, -0.8)
-              .whileTrue(new Eject(canFuelSubsystem));
+            .whileTrue(new Eject(canFuelSubsystem));
         
         operatorJoystick.axisGreaterThan(XboxController.Axis.kRightY.value, 0.8)
             .whileTrue(new Intake(canFuelSubsystem));
@@ -179,25 +180,31 @@ driveJoystick.povRight()
             .whileTrue(new RunCommand(() -> {
                 canFuelSubsystem.setFeederRoller(0);
                 canFuelSubsystem.setIntakeLauncherRoller(0);
-            }, canFuelSubsystem));
+            }, canFuelSubsystem)).onFalse(Commands.runOnce(
+                () -> {
+                    canFuelSubsystem.setFeederRoller(0);
+                    canFuelSubsystem.setIntakeLauncherRoller(0);
+                }, canFuelSubsystem));
     }
 
     public Command getAutonomousCommand() {
         // Simple drive forward auton
-        final var idle = new SwerveRequest.Idle();
-        return Commands.sequence(
-            // Reset our field centric heading to match the robot
-            // facing away from our alliance station wall (0 deg).
-            drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-            // Then slowly drive forward (away from us) for 5 seconds.
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(0.5)
-                    .withVelocityY(0)
-                    .withRotationalRate(0)
-            )
-            .withTimeout(5.0),
-            // Finally idle for the rest of auton
-            drivetrain.applyRequest(() -> idle)
-        );
+        // final var idle = new SwerveRequest.Idle();
+        // return Commands.sequence(
+        //     // Reset our field centric heading to match the robot
+        //     // facing away from our alliance station wall (0 deg).
+        //     drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
+        //     // Then slowly drive forward (away from us) for 5 seconds.
+        //     drivetrain.applyRequest(() ->
+        //         drive.withVelocityX(0.5)
+        //             .withVelocityY(0)
+        //             .withRotationalRate(0)
+        //     )
+        //     .withTimeout(5.0),
+        //     // Finally idle for the rest of auton
+        //     drivetrain.applyRequest(() -> idle)
+        // );
+        // return new ExampleAuto(drivetrain, canFuelSubsystem, climbSubsystem);
+        return Commands.none();
     }
 }
