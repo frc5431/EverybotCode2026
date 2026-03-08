@@ -92,8 +92,13 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
+// NOT TESTED STARTING HERE AND BELOW
 
 
+
+
+
+//Apply rotation left when left dpad is pressed
         driveJoystick.povLeft()
             .onTrue(new RunCommand(() -> {
               
@@ -105,7 +110,7 @@ public class RobotContainer {
 
             }).withTimeout(0.1));
 
-             
+//Apply rotation right when right dpad is pressed         
 driveJoystick.povRight()
             .onTrue(new RunCommand(() -> {
               
@@ -120,7 +125,7 @@ driveJoystick.povRight()
 
 
 
-
+//while right trigger held make driving faster
 
         driveJoystick.rightTrigger(0.8)
             .whileTrue(new RunCommand(() -> {
@@ -136,7 +141,7 @@ driveJoystick.povRight()
             }));
 
 
-
+//while right trigger held make driving slower
             driveJoystick.leftTrigger(0.8)
             .whileTrue(new RunCommand(() -> {
               
@@ -150,7 +155,7 @@ driveJoystick.povRight()
 
             }));
     
-            
+    // END OF NOT TESTED        
 
 
         
