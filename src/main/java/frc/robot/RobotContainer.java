@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,15 +33,15 @@ import frc.robot.commands.Launch;
 import frc.robot.commands.LaunchSequence;
 
 public class RobotContainer {
-    private double FastMaxSpeed = 0.75 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double FastMaxAngularRate = 0.3*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double FastMaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double FastMaxAngularRate = 0.5*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     private double SlowMaxSpeed = 0.15 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double SlowMaxAngularRate = 0.3*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double SlowMaxAngularRate = 0.5*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     
     
-    private double MaxSpeed = 0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = 0.3*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxSpeed = 0.75 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxAngularRate = 0.5*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -63,6 +64,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -132,18 +134,19 @@ driveJoystick.povRight()
             .whileTrue(new RunCommand(() -> {
               
                 
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-MathUtil.applyDeadband(-driveJoystick.getLeftY(), 0.1, 1) * FastMaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-MathUtil.applyDeadband(-driveJoystick.getLeftX(), 0.1, 1) * FastMaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-MathUtil.applyDeadband(driveJoystick.getRightX(), 0.1, 1) * FastMaxAngularRate) // Drive counterclockwise with negative X (left)
-            );
+                drivetrain.applyRequest(() ->
+                    drive.withVelocityX(-MathUtil.applyDeadband(-driveJoystick.getLeftY(), 0.1, 1) * FastMaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityY(-MathUtil.applyDeadband(-driveJoystick.getLeftX(), 0.1, 1) * FastMaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-MathUtil.applyDeadband(driveJoystick.getRightX(), 0.1, 1) * FastMaxAngularRate) // Drive counterclockwise with negative X (left)
+                );
 
 
-            }));
+            }, drivetrain));
 
 
-//while right trigger held make driving slower
-            driveJoystick.leftTrigger(0.8)
+//while left trigger held make driving slower
+            
+    driveJoystick.leftTrigger(0.8)
             .whileTrue(new RunCommand(() -> {
               
                 
@@ -156,6 +159,13 @@ driveJoystick.povRight()
 
             }, drivetrain));
     
+
+
+            driveJoystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+
+
+
     // END OF NOT TESTED        
 
 
@@ -188,6 +198,7 @@ driveJoystick.povRight()
     }
 
     public Command getAutonomousCommand() {
+    
         // Simple drive forward auton
         // final var idle = new SwerveRequest.Idle();
         // return Commands.sequence(
@@ -204,7 +215,7 @@ driveJoystick.povRight()
         //     // Finally idle for the rest of auton
         //     drivetrain.applyRequest(() -> idle)
         // );
-        // return new ExampleAuto(drivetrain, canFuelSubsystem, climbSubsystem);
-        return Commands.none();
+        return new ExampleAuto(drivetrain, canFuelSubsystem, climbSubsystem);
+        // return Commands.none();
     }
 }
