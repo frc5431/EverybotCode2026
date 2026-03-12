@@ -42,6 +42,16 @@ public final class Constants {
     public static final double SPIN_UP_SECONDS = 0.75;
   }
 
+  public static final class HopperConstants {
+    public static final int HOPPER_MOTOR_ID = -1;
+    public static final int HOPPER_BELT_ID = -2;
+
+    public static final int HOPPER_BELT_CURRENT_LIMIT = 50;
+    public static final int HOPPER_MOTOR_CURRENT_LIMIT = 30;
+
+    public static final double HOPPER_MOVING_PERCENT = 0.5;
+  }
+
   public static final class ClimbConstatns {
     // Motor controller IDs for Climb motor
     public static final int CLIMBER_MOTOR_ID = 45;
