@@ -37,7 +37,6 @@ public class HopperSubsystem extends SubsystemBase {
         // Turn exacly 90 deg (direction unknown)
         HopperMotor.set(-speed);
     }
-
     // Direction unknown
     public void spinHopperBelt(double speed) {HopperMotor.set(speed);}
     public void stopHopperBelt() {HopperBelt.set(0);}

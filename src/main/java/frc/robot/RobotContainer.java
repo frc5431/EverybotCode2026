@@ -35,11 +35,11 @@ import frc.robot.commands.Launch;
 import frc.robot.commands.LaunchSequence;
 
 public class RobotContainer {
-    private double FastMaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double FastMaxAngularRate = 0.5*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double FastMaxSpeed = 0.9 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double FastMaxAngularRate = 0.7 * RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     private double SlowMaxSpeed = 0.15 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double SlowMaxAngularRate = 0.5*RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double SlowMaxAngularRate = 0.2 * RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     
     
     private double MaxSpeed = 0.75
@@ -66,12 +66,24 @@ public class RobotContainer {
         configureBindings();
     }
 
+    public double getDriveSpeed() {
+        if (driveJoystick.getRightTriggerAxis() > 0.1) {
+            return (0.5 + driveJoystick.getRightTriggerAxis() / 2) 
+            * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+        } else if (driveJoystick.getLeftTriggerAxis() > 0.1) {
+            return (0.25 + driveJoystick.getLeftTriggerAxis() / 4) 
+            * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+        } else {
+            return MaxSpeed;
+        }
+    }
+
     private void configureBindings() {
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        DoubleSupplier driveSpeed = () -> driveJoystick.getRightTriggerAxis() > 0.7 ? FastMaxSpeed : MaxSpeed;
-        DoubleSupplier driveAngle = () -> driveJoystick.getRightTriggerAxis() > 0.7 ? FastMaxAngularRate : MaxAngularRate;
+        DoubleSupplier driveSpeed = () -> (getDriveSpeed());
+        DoubleSupplier driveAngle = () -> (MaxAngularRate);
         
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
