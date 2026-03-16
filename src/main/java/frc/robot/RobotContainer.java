@@ -8,13 +8,18 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.DoubleSupplier;
 
+import javax.print.attribute.standard.MediaSize.NA;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -64,18 +69,26 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+        configureNamedCommands();
     }
 
     public double getDriveSpeed() {
+        SmartDashboard.putNumber("Left trigger axis", driveJoystick.getLeftTriggerAxis());
+        SmartDashboard.putNumber("Left trigger thing", 0.5 - (driveJoystick.getLeftTriggerAxis() / 4));
+        SmartDashboard.putNumber("Right trigger axis", driveJoystick.getRightTriggerAxis());
+        SmartDashboard.putNumber("Right trigger thing", 0.5 - (driveJoystick.getRightTriggerAxis() / 4));
+
         if (driveJoystick.getRightTriggerAxis() > 0.1) {
-            return (0.5 + driveJoystick.getRightTriggerAxis() / 2) 
+            return (0.5 + (driveJoystick.getRightTriggerAxis() / 2)) 
             * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-        } else if (driveJoystick.getLeftTriggerAxis() > 0.1) {
-            return (0.25 + driveJoystick.getLeftTriggerAxis() / 4) 
-            * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-        } else {
-            return MaxSpeed;
         }
+        
+        if (driveJoystick.getLeftTriggerAxis() > 0.1) {
+            return (0.5 - (driveJoystick.getLeftTriggerAxis() / 4)) 
+            * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+        }
+
+        return MaxSpeed;
     }
 
     private void configureBindings() {
@@ -114,9 +127,6 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
 // NOT TESTED STARTING HERE AND BELOW
-
-
-
 
 
 //Apply rotation left when left dpad is pressed
@@ -164,22 +174,22 @@ driveJoystick.povRight()
 
 //while left trigger held make driving slower
             
-    driveJoystick.leftTrigger(0.8)
-            .whileTrue(new RunCommand(() -> {
+    // driveJoystick.leftTrigger(0.8)
+    //         .whileTrue(new RunCommand(() -> {
               
                 
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-MathUtil.applyDeadband(-driveJoystick.getLeftY(), 0.1, 1) * SlowMaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-MathUtil.applyDeadband(-driveJoystick.getLeftX(), 0.1, 1) * SlowMaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-MathUtil.applyDeadband(driveJoystick.getRightX(), 0.1, 1) * SlowMaxAngularRate) // Drive counterclockwise with negative X (left)
-            );
+    //         drivetrain.applyRequest(() ->
+    //             drive.withVelocityX(-MathUtil.applyDeadband(-driveJoystick.getLeftY(), 0.1, 1) * SlowMaxSpeed) // Drive forward with negative Y (forward)
+    //                 .withVelocityY(-MathUtil.applyDeadband(-driveJoystick.getLeftX(), 0.1, 1) * SlowMaxSpeed) // Drive left with negative X (left)
+    //                 .withRotationalRate(-MathUtil.applyDeadband(driveJoystick.getRightX(), 0.1, 1) * SlowMaxAngularRate) // Drive counterclockwise with negative X (left)
+    //         );
 
 
-            }, drivetrain));
+    //         }, drivetrain));
     
 
 
-            driveJoystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+    //         driveJoystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
 
 
@@ -215,6 +225,14 @@ driveJoystick.povRight()
                 }, canFuelSubsystem));
     }
 
+    public void configureNamedCommands() {
+        NamedCommands.registerCommand("LaunchSequence", new LaunchSequence(canFuelSubsystem));
+        NamedCommands.registerCommand("ClimbUp", new ClimbUp(climbSubsystem));
+        NamedCommands.registerCommand("ClimbDown", new ClimbDown(climbSubsystem));
+        NamedCommands.registerCommand("Intake", new Intake(canFuelSubsystem));
+        NamedCommands.registerCommand("Eject", new Eject(canFuelSubsystem));
+    }
+
     public Command getAutonomousCommand() {
     
         // Simple drive forward auton
@@ -233,7 +251,10 @@ driveJoystick.povRight()
         //     // Finally idle for the rest of auton
         //     drivetrain.applyRequest(() -> idle)
         // );
-        return new ExampleAuto(drivetrain, canFuelSubsystem, climbSubsystem);
+        // return new ExampleAuto(drivetrain, canFuelSubsystem, climbSubsystem);
+        
+        // return new PathPlannerAuto("TestAuto");
+        return new PathPlannerAuto("LeftTrenchToNeutral");
         // return Commands.none();
     }
 }

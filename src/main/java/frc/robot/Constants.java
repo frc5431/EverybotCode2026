@@ -4,6 +4,12 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
+import com.pathplanner.lib.config.RobotConfig;
+
+import frc.robot.utils.LoggedTunableNumber;
+
 // import com.revrobotics.spark.FeedbackSensor;
 // import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 // import com.revrobotics.spark.config.SparkFlexConfig;
@@ -20,6 +26,8 @@ package frc.robot;
  */
 public final class Constants {
 
+  public static final boolean tuningMode = false;
+
   public static final class FuelConstants {
     // Motor controller IDs for Fuel Mechanism motors
     public static final int LEFT_INTAKE_LAUNCHER_MOTOR_ID = 14;
@@ -32,14 +40,22 @@ public final class Constants {
 
     // All values likely need to be tuned based on your robot
     public static final double INDEXER_INTAKING_PERCENT = 1;
-    public static final double INDEXER_LAUNCHING_PERCENT = 0.5;
-    public static final double INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT = -0.5;
+    public static final double INDEXER_LAUNCHING_PERCENT = -0.5;
+    public static final double INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT = 0.5;
 
     public static final double INTAKE_INTAKING_PERCENT = 0.6;
     public static final double LAUNCHING_LAUNCHER_PERCENT = 0.85;
     public static final double INTAKE_EJECT_PERCENT = -0.8;
 
     public static final double SPIN_UP_SECONDS = 0.75;
+
+    public static final LoggedTunableNumber kp_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/kp", 0);
+    public static final LoggedTunableNumber ki_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/ki", 0);
+    public static final LoggedTunableNumber kd_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/kd", 0);
+    public static final LoggedTunableNumber kg_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/kg", 0);
+    public static final LoggedTunableNumber ks_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/ks", 0);
+    public static final LoggedTunableNumber kv_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/kv", 0);
+    public static final LoggedTunableNumber ka_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/ka", 0);
   }
 
   public static final class HopperConstants {
