@@ -83,6 +83,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   }
 
   public void setIntakeLauncherRollerVelocity(AngularVelocity desired) {
+    Logger.recordOutput("Shooter/DesiredSpeed", desired.in(Units.RPM));
     LoggedTunableNumber.ifChanged(hashCode(), (args) -> {
         ff.setKs(args[0]);
         ff.setKv(args[1]);
@@ -93,11 +94,14 @@ public class CANFuelSubsystem extends SubsystemBase {
         pid.setP(args[0]);
         pid.setI(args[1]);
         pid.setD(args[2]);
-    }, kp_SHOOTER_PID, ki_SHOOTER_PID, kp_SHOOTER_PID);
+    }, kp_SHOOTER_PID, ki_SHOOTER_PID, kd_SHOOTER_PID);
 
     double ffVoltage = ff.calculate(desired.in(Units.RPM));
+    Logger.recordOutput("Shooter/ffVoltage", ffVoltage);
     double current = LeftLeaderIntakeLauncher.getEncoder().getVelocity();
+    Logger.recordOutput("Shooter/CurrentSpeed", current);
     double pidVoltage = pid.calculate(current, desired.in(Units.RPM));
+    Logger.recordOutput("Shooter/pidVoltage", pidVoltage);
 
     LeftLeaderIntakeLauncher.setVoltage(ffVoltage + pidVoltage);
   }

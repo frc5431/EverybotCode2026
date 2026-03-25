@@ -18,6 +18,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -41,6 +42,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    public static final double DRIVE_BASE_RADIUS =
+      Math.max(
+          Math.max(
+              Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+              Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+          Math.max(
+              Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+              Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+          )
+    );
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -143,7 +155,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 () -> (getState().Pose), // Robot pose supplier
                 this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
                 () -> (getState().Speeds), // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds, feedforwards) -> setControl(new SwerveRequest.ApplyRobotSpeeds().withSpeeds(speeds)), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+                // Old Unoptimized version(speeds, feedforwards) -> setControl(new SwerveRequest.ApplyRobotSpeeds().withSpeeds(speeds)), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+                (speeds, feedforwards) -> setControl(
+    new SwerveRequest.ApplyRobotSpeeds()
+        .withSpeeds(speeds)
+        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+),
+
                 new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                         new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                         new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
@@ -192,9 +211,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         super(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
-        }
-
-        
+        }        
     }
 
     /**
@@ -342,5 +359,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
     }
 
+    /** Returns the maximum linear speed in meters per sec. */
+    public double getMaxLinearSpeedMetersPerSec() {
+        return TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    }
+
+    /** Returns the maximum angular speed in radians per sec. */
+    public double getMaxAngularSpeedRadPerSec() {
+        return getMaxLinearSpeedMetersPerSec() / DRIVE_BASE_RADIUS;
+    }
     
+    public void runVelocity(ChassisSpeeds speeds) {setControl(new SwerveRequest.ApplyRobotSpeeds().withSpeeds(speeds));};
 }

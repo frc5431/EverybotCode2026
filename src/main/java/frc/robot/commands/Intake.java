@@ -4,8 +4,10 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.CANFuelSubsystem;
 import static frc.robot.Constants.FuelConstants.*;
 
@@ -22,10 +24,16 @@ public class Intake extends Command {
 
   // Called when the command is initially scheduled. Set the rollers to the
   // appropriate values for intaking
+  // @Override
+  // public void initialize() {
+  //   fuelSubsystem
+  //       .setIntakeLauncherRoller(SmartDashboard.getNumber("Intaking intake roller value", INTAKE_INTAKING_PERCENT));
+  //   fuelSubsystem.setFeederRoller(SmartDashboard.getNumber("Intaking feeder roller value", INDEXER_INTAKING_PERCENT));
+  // }
+
   @Override
   public void initialize() {
-    fuelSubsystem
-        .setIntakeLauncherRoller(SmartDashboard.getNumber("Intaking intake roller value", INTAKE_INTAKING_PERCENT));
+    fuelSubsystem.setIntakeLauncherRoller(Constants.FuelConstants.INTAKE_INTAKING_PERCENT);
     fuelSubsystem.setFeederRoller(SmartDashboard.getNumber("Intaking feeder roller value", INDEXER_INTAKING_PERCENT));
   }
 

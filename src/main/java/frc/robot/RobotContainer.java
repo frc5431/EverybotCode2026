@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import javax.print.attribute.standard.MediaSize.NA;
 
@@ -18,6 +19,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,20 +34,33 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CANFuelSubsystem;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.HopperSubsystem;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.utils.FieldConstants;
 import frc.robot.commands.ClimbDown;
 import frc.robot.commands.ClimbUp;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.Eject;
 import frc.robot.commands.ExampleAuto;
+import frc.robot.commands.ExtendHopper;
 import frc.robot.commands.Intake;
 import frc.robot.commands.Launch;
 import frc.robot.commands.LaunchSequence;
+import frc.robot.commands.RetractHopper;
+import frc.robot.commands.Tuning;
+
+
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import frc.robot.utils.AllianceFlipUtil;;
 
 public class RobotContainer {
-    private double FastMaxSpeed = 0.9 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double FastMaxAngularRate = 0.7 * RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    // private double FastMaxSpeed = 0.9 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    // private double FastMaxAngularRate = 0.7 * RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
-    private double SlowMaxSpeed = 0.15 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double SlowMaxAngularRate = 0.2 * RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    // private double SlowMaxSpeed = 0.15 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    // private double SlowMaxAngularRate = 0.2 * RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     
     
     private double MaxSpeed = 0.75
@@ -66,6 +82,11 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final CANFuelSubsystem canFuelSubsystem = new CANFuelSubsystem();
     public final ClimberSubsystem climbSubsystem = new ClimberSubsystem();
+    public final HopperSubsystem hopperSubsystem = new HopperSubsystem();
+    public final Vision vision = new Vision((visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs) -> {
+        drivetrain.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    }, new VisionIOLimelight("Limelight", () -> drivetrain.getState().Pose.getRotation()));
+    
 
     public RobotContainer() {
         configureBindings();
@@ -119,85 +140,12 @@ public class RobotContainer {
             point.withModuleDirection(new Rotation2d(-driveJoystick.getLeftY(), -driveJoystick.getLeftX()))
         ));
 
-        operatorJoystick.a();
+       
 
         // Reset the field-centric heading on left bumper press.
         driveJoystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
-
-// NOT TESTED STARTING HERE AND BELOW
-
-
-//Apply rotation left when left dpad is pressed
-        driveJoystick.povLeft()
-            .onTrue(new RunCommand(() -> {
-              
-                
-            drivetrain.applyRequest(() ->
-                drive.withRotationalRate(-0.1) // Drive counterclockwise with negative X (left)
-            );
-
-
-            }, drivetrain).withTimeout(0.1));
-
-//Apply rotation right when right dpad is pressed         
-driveJoystick.povRight()
-            .onTrue(new RunCommand(() -> {
-              
-                
-            drivetrain.applyRequest(() ->
-                drive.withRotationalRate(0.1) // Drive counterclockwise with negative X (left)
-            );
-
-
-            }, drivetrain).withTimeout(0.1));
-
-
-
-
-//while right trigger held make driving faster
-
-        // driveJoystick.rightTrigger(0.8)
-        //     .whileTrue(new RunCommand(() -> {
-              
-                
-        //         drivetrain.applyRequest(() ->
-        //             drive.withVelocityX(-MathUtil.applyDeadband(-driveJoystick.getLeftY(), 0.1, 1) * FastMaxSpeed) // Drive forward with negative Y (forward)
-        //                 .withVelocityY(-MathUtil.applyDeadband(-driveJoystick.getLeftX(), 0.1, 1) * FastMaxSpeed) // Drive left with negative X (left)
-        //                 .withRotationalRate(-MathUtil.applyDeadband(driveJoystick.getRightX(), 0.1, 1) * FastMaxAngularRate) // Drive counterclockwise with negative X (left)
-        //         );
-
-
-        //     }, drivetrain));
-
-
-//while left trigger held make driving slower
-            
-    // driveJoystick.leftTrigger(0.8)
-    //         .whileTrue(new RunCommand(() -> {
-              
-                
-    //         drivetrain.applyRequest(() ->
-    //             drive.withVelocityX(-MathUtil.applyDeadband(-driveJoystick.getLeftY(), 0.1, 1) * SlowMaxSpeed) // Drive forward with negative Y (forward)
-    //                 .withVelocityY(-MathUtil.applyDeadband(-driveJoystick.getLeftX(), 0.1, 1) * SlowMaxSpeed) // Drive left with negative X (left)
-    //                 .withRotationalRate(-MathUtil.applyDeadband(driveJoystick.getRightX(), 0.1, 1) * SlowMaxAngularRate) // Drive counterclockwise with negative X (left)
-    //         );
-
-
-    //         }, drivetrain));
-    
-
-
-    //         driveJoystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
-
-
-
-    // END OF NOT TESTED        
-
-
-        
 
         operatorJoystick.axisLessThan(XboxController.Axis.kRightY.value, -0.8)
             .whileTrue(new Eject(canFuelSubsystem));
@@ -210,6 +158,10 @@ driveJoystick.povRight()
         
         operatorJoystick.axisLessThan(XboxController.Axis.kLeftY.value, -0.8)
             .whileTrue(new ClimbDown(climbSubsystem));
+        
+        operatorJoystick.a().whileTrue(new Tuning(canFuelSubsystem));
+        operatorJoystick.rightBumper().whileTrue(new ExtendHopper(hopperSubsystem));
+        operatorJoystick.leftBumper().whileTrue(new RetractHopper(hopperSubsystem));
         
         operatorJoystick.rightTrigger(0.8)
             .whileTrue(new LaunchSequence(canFuelSubsystem));
@@ -226,11 +178,17 @@ driveJoystick.povRight()
     }
 
     public void configureNamedCommands() {
+        // Fixed commands
         NamedCommands.registerCommand("LaunchSequence", new LaunchSequence(canFuelSubsystem));
         NamedCommands.registerCommand("ClimbUp", new ClimbUp(climbSubsystem));
         NamedCommands.registerCommand("ClimbDown", new ClimbDown(climbSubsystem));
         NamedCommands.registerCommand("Intake", new Intake(canFuelSubsystem));
         NamedCommands.registerCommand("Eject", new Eject(canFuelSubsystem));
+        NamedCommands.registerCommand("ExtendHopper", new ExtendHopper(hopperSubsystem));
+        NamedCommands.registerCommand("RetractHopper", new RetractHopper(hopperSubsystem));
+        // Automatic alignment commands
+        NamedCommands.registerCommand("AutoAlignHub", DriveCommands.joystickDriveAtAngle(
+            drivetrain, () -> 0, () -> 0, (Supplier<Rotation2d>) () -> getTranslationToHub().getAngle()));
     }
 
     public Command getAutonomousCommand() {
@@ -254,7 +212,32 @@ driveJoystick.povRight()
         // return new ExampleAuto(drivetrain, canFuelSubsystem, climbSubsystem);
         
         // return new PathPlannerAuto("TestAuto");
-        return new PathPlannerAuto("LeftTrenchToNeutral");
+        return new PathPlannerAuto("VisionAlignTest");
         // return Commands.none();
+    }
+
+    public Translation2d getTranslationToHub() {
+        Translation2d hubPose = FieldConstants.Hub.innerCenterPoint.toTranslation2d();
+        Translation2d hubPoseAdj = AllianceFlipUtil.apply(hubPose);
+        
+        Pose2d shooterPose = drivetrain.getState().Pose;
+        Translation2d diff = hubPoseAdj.minus(shooterPose.getTranslation());
+        Logger.recordOutput("/Measurements/DistToHub", diff.getNorm());
+        Logger.recordOutput("/Measurements/AngleToHub", diff.getAngle());
+        return diff;
+    }
+
+    public Translation2d getTranslationToClimb() {
+        Translation2d climbPose = FieldConstants.Tower.rightUpright;
+        Translation2d climbPoseAdj = AllianceFlipUtil.apply(climbPose);
+        
+        Pose2d robotPose = drivetrain.getState().Pose;
+        Transform2d climbTransform = new Transform2d(Inches.of(-10.824), Inches.of(8.125), Rotation2d.kZero);
+        Pose2d climberPose = robotPose.transformBy(climbTransform);
+
+        Translation2d diff = climbPoseAdj.minus(climberPose.getTranslation());
+        Logger.recordOutput("/Measurements/DistToClimb", diff.getNorm());
+        Logger.recordOutput("/Measurements/AngleToClimb", diff.getAngle());
+        return diff;
     }
 }

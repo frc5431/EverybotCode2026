@@ -7,40 +7,44 @@ package frc.robot.commands;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.FuelConstants;
+import frc.robot.Constants;
 import frc.robot.subsystems.CANFuelSubsystem;
+import frc.robot.utils.LoggedTunableNumber;
+
 import static frc.robot.Constants.FuelConstants.*;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class Eject extends Command {
+public class Tuning extends Command {
   /** Creates a new Intake. */
 
   CANFuelSubsystem fuelSubsystem;
 
-  public Eject(CANFuelSubsystem fuelSystem) {
+  public Tuning(CANFuelSubsystem fuelSystem) {
     addRequirements(fuelSystem);
     this.fuelSubsystem = fuelSystem;
   }
 
   // Called when the command is initially scheduled. Set the rollers to the
-  // appropriate values for ejecting
-
+  // appropriate values for intaking
   // @Override
   // public void initialize() {
-  //   fuelSubsystem.setIntakeLauncherRoller(-1 * SmartDashboard.getNumber("Intaking intake roller value", INTAKE_EJECT_PERCENT));
-  //   fuelSubsystem.setFeederRoller(SmartDashboard.getNumber("Intaking intake roller value", INDEXER_LAUNCHING_PERCENT));
+  //   fuelSubsystem
+  //       .setIntakeLauncherRoller(SmartDashboard.getNumber("Intaking intake roller value", INTAKE_INTAKING_PERCENT));
+  //   fuelSubsystem.setFeederRoller(SmartDashboard.getNumber("Intaking feeder roller value", INDEXER_INTAKING_PERCENT));
   // }
 
   @Override
   public void initialize() {
-    fuelSubsystem.setIntakeLauncherRoller(FuelConstants.INTAKE_EJECT_PERCENT);
-    fuelSubsystem.setFeederRoller(SmartDashboard.getNumber("Intaking intake roller value", INDEXER_LAUNCHING_PERCENT));
+    fuelSubsystem.setIntakeLauncherRollerVelocity(Units.RPM.of(Constants.FuelConstants.SHOOTER_SPEED.get()));
+    // fuelSubsystem.setFeederRoller(SmartDashboard.getNumber("Intaking feeder roller value", INDEXER_INTAKING_PERCENT));
+    fuelSubsystem.setFeederRoller(-0.5);
   }
 
   // Called every time the scheduler runs while the command is scheduled. This
   // command doesn't require updating any values while running
   @Override
   public void execute() {
+    fuelSubsystem.setIntakeLauncherRollerVelocity(Units.RPM.of(Constants.FuelConstants.SHOOTER_SPEED.get()));
   }
 
   // Called once the command ends or is interrupted. Stop the rollers
