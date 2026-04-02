@@ -91,8 +91,9 @@ public class RobotContainer {
     public final HopperSubsystem hopperSubsystem = new HopperSubsystem();
     public final Vision vision = new Vision((visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs) -> {
         drivetrain.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
-    }, new VisionIOLimelight("Limelight", () -> drivetrain.getState().Pose.getRotation()));
+    }, new VisionIOLimelight("Limelight", () -> (drivetrain.getState().Pose.getRotation())));
     
+
 
     public RobotContainer() {
         configureBindings();
@@ -101,6 +102,7 @@ public class RobotContainer {
     }
 
     public void configureDefaultCommands() {
+        canFuelSubsystem.setDefaultCommand(new IdleLaunch(canFuelSubsystem));
         climbSubsystem.setDefaultCommand(new IdleClimb(climbSubsystem));
         hopperSubsystem.setDefaultCommand(new IdleHopper(hopperSubsystem));
     }
@@ -155,7 +157,7 @@ public class RobotContainer {
         // Reset the field-centric heading on left bumper press.
         driveJoystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        driveJoystick.a().whileTrue(DriveCommands.joystickDriveAtAngle(
+        driveJoystick.x().whileTrue(DriveCommands.joystickDriveAtAngle(
             drivetrain, () -> -driveJoystick.getLeftY(), () -> -driveJoystick.getLeftX(), 
             () -> getTranslationToHub().getAngle()));
 
@@ -242,7 +244,7 @@ public class RobotContainer {
         Translation2d hubPoseAdj = AllianceFlipUtil.apply(hubPose);
         
         Pose2d shooterPose = drivetrain.getState().Pose;
-        Translation2d diff = hubPoseAdj.minus(shooterPose.getTranslation());
+        Translation2d diff = new Translation2d(0, 0).minus(hubPoseAdj.minus(shooterPose.getTranslation()));
         Logger.recordOutput("/Measurements/DistToHub", diff.getNorm());
         Logger.recordOutput("/Measurements/AngleToHub", diff.getAngle());
         return diff;
