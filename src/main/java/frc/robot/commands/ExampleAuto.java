@@ -28,7 +28,7 @@ public class ExampleAuto extends SequentialCommandGroup {
           new AutoDrive(driveSubsystem, 0, 0).withTimeout(0.1)
         )
       ),
-      new LaunchSequence(ballSubsystem).withTimeout(6),
+      new LaunchSequence(ballSubsystem, () -> (1)).withTimeout(6),
       new AutoDrive(driveSubsystem, 0.5, -0.02).withTimeout(1.8), // from 2.25
       new AutoDrive(driveSubsystem, 0, 0).withTimeout(0.1),
       new ClimbDown(climb).withTimeout(10)

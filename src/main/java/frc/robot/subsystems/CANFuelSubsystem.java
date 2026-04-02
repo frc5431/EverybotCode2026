@@ -79,7 +79,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   // A method to set the voltage of the intake roller
   public void setIntakeLauncherRoller(double power) {
     LeftLeaderIntakeLauncher.set(power);
-    RightFollowerIntakeLauncher.set(power); // positive for shooting
+    // RightFollowerIntakeLauncher.set(power); // positive for shooting
   }
 
   public void setIntakeLauncherRollerVelocity(AngularVelocity desired) {
@@ -115,7 +115,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   public void stop() {
     Indexer.set(0);
     LeftLeaderIntakeLauncher.set(0);
-    RightFollowerIntakeLauncher.set(0);
+    // RightFollowerIntakeLauncher.set(0);
   }
 
   @Override

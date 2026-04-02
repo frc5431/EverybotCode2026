@@ -35,24 +35,27 @@ public final class Constants {
     public static final int INDEXER_MOTOR_ID = 15;
 
     // Current limit for fuel mechanism motors.
-    public static final int INDEXER_MOTOR_CURRENT_LIMIT = 80;
-    public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 80;
+    public static final int INDEXER_MOTOR_CURRENT_LIMIT = 65;
+    public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 65;
 
     // All values likely need to be tuned based on your robot
     public static final double INDEXER_INTAKING_PERCENT = 1;
     public static final double INDEXER_LAUNCHING_PERCENT = -0.5;
-    public static final double INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT = 0.5;
+    public static final double INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT = 0.2;
 
     public static final double INTAKE_INTAKING_PERCENT = 0.6;
     public static final double LAUNCHING_LAUNCHER_PERCENT = 0.85;
     public static final double INTAKE_EJECT_PERCENT = -0.8;
-
-    public static final double INDEXER_SPIN_UP_PRE_LAUNCH_RPM = 20;
-    public static final double LAUNCHING_LAUNCHER_RPM = 5500;
-    public static final double INTAKE_INTAKING_RPM = 20;
-    public static final double INTAKE_EJECT_RPM = 30;
-
     public static final double SPIN_UP_SECONDS = 0.75;
+
+    // Evan implementation
+    public static final double SLOW_LAUNCHER_RPM = 3000;
+    public static final double MEDIUM_LAUNCHER_RPM = 4500;
+    public static final double FAST_LAUNCHER_RPM = 6000;
+
+    // Ayan implementation
+    public static final double MIN_LAUNCHER_RPM = 4000;
+    public static final double MAX_LAUNCHER_RPM = 6000;
 
     public static final LoggedTunableNumber kp_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/kp", 0.00007);
     public static final LoggedTunableNumber ki_SHOOTER_PID = new LoggedTunableNumber("PIDConstants/Shooter/ki", 0);
@@ -64,10 +67,11 @@ public final class Constants {
   }
 
   public static final class HopperConstants {
-    public static final int HOPPER_MOTOR_ID = 0;
+    public static final int HOPPER_MOTOR_ID = 46;
     public static final int HOPPER_MOTOR_CURRENT_LIMIT = 40;
-    public static final double HOPPER_MOTOR_VOLTAGE = 6.0;
-    public static final double HOPPER_MAX_CURRENT = 40.0; 
+    public static final double HOPPER_MOTOR_FORWARD_VOLTAGE = 2.0;
+    public static final double HOPPER_MOTOR_BACKWARD_VOLTAGE = 2.0;
+    public static final double HOPPER_MAX_CURRENT = 20.0; 
   }
 
   public static final class ClimbConstatns {

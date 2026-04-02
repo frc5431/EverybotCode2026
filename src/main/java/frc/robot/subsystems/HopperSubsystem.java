@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.HopperConstants.*;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.PersistMode;
@@ -34,5 +36,13 @@ public class HopperSubsystem extends SubsystemBase {
 
     public double getCurrent() {
         return hopperMotor.getOutputCurrent();
+    }
+
+    @Override
+    public void periodic() {
+        Logger.recordOutput("Hopper/Voltage", hopperMotor.getBusVoltage() * hopperMotor.getAppliedOutput());
+        Logger.recordOutput("Hopper/Velocity", hopperMotor.getEncoder().getVelocity());
+        Logger.recordOutput("Hopper/SupplyCurrent", hopperMotor.getOutputCurrent() * hopperMotor.getAppliedOutput());
+        Logger.recordOutput("Hopper/StatorCurrent", hopperMotor.getOutputCurrent());
     }
 }

@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.ClimbConstatns.*;
 
+import org.littletonrobotics.junction.Logger;
+
 public class ClimberSubsystem extends SubsystemBase {
   private final SparkMax climberMotor;
 
@@ -37,8 +39,11 @@ public class ClimberSubsystem extends SubsystemBase {
     climberMotor.set(0);
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+   @Override
+    public void periodic() {
+        Logger.recordOutput("Climber/Voltage", climberMotor.getBusVoltage() * climberMotor.getAppliedOutput());
+        Logger.recordOutput("Climber/Velocity", climberMotor.getEncoder().getVelocity());
+        Logger.recordOutput("Climber/SupplyCurrent", climberMotor.getOutputCurrent() * climberMotor.getAppliedOutput());
+        Logger.recordOutput("Climber/StatorCurrent", climberMotor.getOutputCurrent());
+    }
 }
